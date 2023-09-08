@@ -1,0 +1,8 @@
+name: iArmazem
+version: '${version}'
+main: br.com.ion.iarmazem.IArmazem
+api-version: '1.20'
+commands:
+  armazem:
+    aliases:
+      - automacao
