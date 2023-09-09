@@ -9,17 +9,21 @@ import br.com.ion.iarmazem.events.SpawnItemEvent;
 import br.com.ion.iarmazem.exceptions.InvalidDatabaseSchemaException;
 import com.plotsquared.core.PlotAPI;
 import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.Objects;
 
 public final class IArmazem extends JavaPlugin {
 
     private Economy economy;
     private HikariConnect hikariConnect;
+
+    private Permission perms;
 
     private DatabaseMethod databaseMethod;
 
@@ -30,10 +34,12 @@ public final class IArmazem extends JavaPlugin {
     public void onEnable() {
         LogHelper.logI("Iniciando...");
         saveDefaultConfig();
+        setupEconomy();
         setupDatabase();
         setupDomain();
         setupEventsAndCommands();
-        setupEconomy();
+        setupPermissions();
+
     }
 
     private void setupDomain() {
@@ -44,8 +50,8 @@ public final class IArmazem extends JavaPlugin {
         if (Bukkit.getPluginManager().getPlugin("PlotSquared") != null) {
             PlotAPI api = new PlotAPI();
             new PlotEvent(api, databaseMethod, this);
-            new InventoryArmazemEvent(api,databaseMethod, economy);
-            new SpawnItemEvent(api, databaseMethod);
+            getServer().getPluginManager().registerEvents(new InventoryArmazemEvent(api, databaseMethod, economy), this);
+            getServer().getPluginManager().registerEvents(new SpawnItemEvent(api, databaseMethod), this);
             getCommand("armazem").setExecutor(new CommandArmazem(api, armazemInventory, databaseMethod));
         } else {
             throw new RuntimeException("Missing PlotSquared plugin");
@@ -53,9 +59,15 @@ public final class IArmazem extends JavaPlugin {
     }
 
     private void setupDatabase() {
-        onEnableBanco();
-        databaseMethod = new DatabaseMethod(hikariConnect, this);
-        LogHelper.logI("Banco de dados iniciado com sucesso!");
+        try {
+            onEnableBanco();
+            databaseMethod = new DatabaseMethod(hikariConnect, this);
+            databaseMethod.createTable();
+            LogHelper.logI("Banco de dados iniciado com sucesso!");
+        } catch (SQLException e) {
+            LogHelper.logI("Erro ao criar banco de dados: " + e);
+        }
+
     }
 
     private void setupEconomy() {
@@ -63,6 +75,12 @@ public final class IArmazem extends JavaPlugin {
         if (economyProvider != null) {
             economy = economyProvider.getProvider();
         }
+    }
+
+    private boolean setupPermissions() {
+        RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
+        perms = rsp.getProvider();
+        return perms != null;
     }
 
     @Override
@@ -83,4 +101,11 @@ public final class IArmazem extends JavaPlugin {
         }
     }
 
+    public void setEconomy(Economy economy) {
+        this.economy = economy;
+    }
+
+    public Economy getEconomy() {
+        return this.economy;
+    }
 }

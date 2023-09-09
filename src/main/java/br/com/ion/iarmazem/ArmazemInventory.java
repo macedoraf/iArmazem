@@ -19,6 +19,7 @@ public class ArmazemInventory {
         this.main = main;
     }
 
+
     public void openInventory(Player player, PlotModel plotModel) {
         Inventory inventory = Bukkit.createInventory(null, 5 * 9, "§8Armazem");
         for (String k : main.getConfig().getConfigurationSection("InventoryConfiguration").getKeys(false)) {
@@ -34,12 +35,12 @@ public class ArmazemInventory {
             }
 
             String ID = main.getConfig().getString("Itens-armazem." + k + ".ID");
-
-            ItemStack itemStack = new ItemStack(Material.getMaterial(ID));
+            Material material = PlotHelper.getMaterial(ID);
+            ItemStack itemStack = new ItemStack(material);
             ItemMeta itemMeta = itemStack.getItemMeta();
             String name = main.getConfig().getString("Itens-armazem." + k + ".name");
             Double price = main.getConfig().getDouble("Itens-armazem." + k + ".price");
-            itemMeta.setDisplayName(name.replaceAll("&", "§"));
+            itemMeta.setDisplayName(name == null ? "NULL" : name);
             ArrayList<String> loreMeta = new ArrayList<>();
             int quantidade = plotModel.getArmazemModel().getAmountItemByID(ID);
             double money = quantidade * price;

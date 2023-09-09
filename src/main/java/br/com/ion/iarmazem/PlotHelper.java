@@ -5,6 +5,7 @@ import com.plotsquared.core.plot.Plot;
 import com.plotsquared.core.plot.PlotArea;
 import com.plotsquared.core.plot.world.PlotAreaManager;
 import org.bukkit.Location;
+import org.bukkit.Material;
 
 import java.util.Objects;
 
@@ -27,4 +28,11 @@ public abstract class PlotHelper {
 
         return currentPlot;
     }
+
+    public static Material getMaterial(String name) {
+        LogHelper.logI("Material = " + name);
+        Material material = Material.getMaterial(name);
+        return material == null ? Material.AIR : material;
+    }
+
 }

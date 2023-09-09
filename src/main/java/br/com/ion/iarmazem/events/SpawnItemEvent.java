@@ -14,6 +14,8 @@ import com.plotsquared.core.plot.world.PlotAreaManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -21,7 +23,7 @@ import java.sql.SQLException;
 import java.util.Objects;
 import java.util.UUID;
 
-public class SpawnItemEvent {
+public class SpawnItemEvent implements Listener {
 
     private final PlotAPI api;
     private final DatabaseMethod databaseMethod;
@@ -31,11 +33,10 @@ public class SpawnItemEvent {
         this.api = api;
         this.databaseMethod = databaseMethod;
         this.plotAreaManager = api.getPlotSquared().getPlotAreaManager();
-        api.registerListener(this);
     }
 
 
-    @Subscribe
+    @EventHandler
     public void toSpawnItem(ItemSpawnEvent e) throws SQLException {
         Plot currentPlot = null;
         Location location = e.getLocation();

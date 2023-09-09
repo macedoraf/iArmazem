@@ -1,5 +1,6 @@
 package br.com.ion.iarmazem.events;
 
+import br.com.ion.iarmazem.LogHelper;
 import br.com.ion.iarmazem.PlotHelper;
 import br.com.ion.iarmazem.data.database.DatabaseMethod;
 import br.com.ion.iarmazem.model.ArmazemModel;
@@ -15,6 +16,8 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -23,7 +26,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.UUID;
 
-public class InventoryArmazemEvent {
+public class InventoryArmazemEvent implements Listener {
 
     private final PlotAPI api;
     private final DatabaseMethod databaseMethod;
@@ -36,13 +39,13 @@ public class InventoryArmazemEvent {
         this.databaseMethod = databaseMethod;
         this.plotAreaManager = api.getPlotSquared().getPlotAreaManager();
         this.economy = economy;
-        api.registerListener(this);
     }
 
-    @Subscribe
+    @EventHandler
     public void onClickInventory(InventoryClickEvent e) throws SQLException {
         ItemStack itemStack = e.getCurrentItem();
         if (itemStack == null || itemStack.getType() == Material.AIR) return;
+        LogHelper.logI("onClickInventory: " + e.getView().getTitle());
         if (!e.getView().getTitle().equalsIgnoreCase("§8Armazem")) return;
         HumanEntity whoClicked = e.getWhoClicked();
         e.setCancelled(true);
