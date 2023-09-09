@@ -1,20 +1,25 @@
 package br.com.ion.iarmazem.events;
 
+import br.com.ion.iarmazem.ActionBarAPI;
 import br.com.ion.iarmazem.data.database.DatabaseMethod;
 import br.com.ion.iarmazem.model.PlotModel;
 import com.google.common.eventbus.Subscribe;
+import com.plotsquared.bukkit.util.BukkitRegionManager;
 import com.plotsquared.core.PlotAPI;
 import com.plotsquared.core.plot.Plot;
 import com.plotsquared.core.plot.PlotArea;
+import com.plotsquared.core.plot.PlotId;
+import com.plotsquared.core.plot.PlotManager;
 import com.plotsquared.core.plot.world.PlotAreaManager;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.Player;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.sql.SQLException;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
+import java.util.UUID;
 
 public class SpawnItemEvent {
 
@@ -32,45 +37,55 @@ public class SpawnItemEvent {
 
     @Subscribe
     public void toSpawnItem(ItemSpawnEvent e) throws SQLException {
+        Plot currentPlot = null;
         Location location = e.getLocation();
-        if (verifyIsPlot(location)) return;
+        PlotArea plotArea = requirePlotArea(location);
+        if (plotArea == null) return;
 
-
-        if (!databaseMethod.hasPlot(plot.getId().toString())) {
-            databaseMethod.setDefaultPlot(plot);
+        for (Plot itemPlot : api.getAllPlots()) {
+            if (Objects.equals(itemPlot.getArea(), plotArea)) {
+                currentPlot = itemPlot;
+                break;
+            }
         }
-        PlotModel plotModel = databaseMethod.getPlotModelByID(plot.getId().toString());
+
+        if (currentPlot == null) return;
+
+        if (!databaseMethod.hasPlot(currentPlot.getId().toString())) {
+            databaseMethod.setDefaultPlot(currentPlot);
+        }
+
+        PlotModel plotModel = databaseMethod.getPlotModelByID(currentPlot.getId().toString());
         ItemStack itemStack = e.getEntity().getItemStack();
-        if (plotModel.getArmazemModel().hasItem(itemStack.getTypeId() + "")) {
+
+        if (plotModel.getArmazemModel().hasItem(itemStack.getType().toString())) {
             int limite = plotModel.getLimite();
             int itensSize = plotModel.getArmazemModel().getItensSize();
             int amount = itemStack.getAmount();
             if (limite >= (itensSize + amount)) {
-                plotModel.getArmazemModel().addItem(itemStack.getTypeId() + "", amount);
+                plotModel.getArmazemModel().addItem(itemStack.getType().toString(), amount);
                 databaseMethod.saveArmazemModel(plotModel);
                 e.setCancelled(true);
                 return;
             }
-            for (UUID uuid : plot.getOwners()) {
+            for (UUID uuid : currentPlot.getOwners()) {
                 try {
                     Player player = Bukkit.getPlayer(uuid);
-                    if (player.isOnline()) ActionBarAPI.send(player, "§cArmazém lotado!");
+                    if (player != null && player.isOnline()) ActionBarAPI.send(player, "§cArmazém lotado!");
                 } catch (Exception ignored) {
                 }
             }
         }
     }
 
-    private boolean verifyIsPlot(Location l) {
+    private PlotArea requirePlotArea(Location l) {
         String worldName = Objects.requireNonNull(l.getWorld()).getName();
-        if (plotAreaManager.hasPlotArea(worldName)) {
-            return false
-        }
-        for (PlotArea plotArea : api.getPlotAreas(worldName)) {
-            plotArea.getPlotAbs(l)
-        }
+        int x = l.getBlockX();
+        int y = l.getBlockY();
+        int z = l.getBlockZ();
 
+        return plotAreaManager
+                .getPlotArea(com.plotsquared.core.location.Location.at(worldName, x, y, z));
 
-        return
     }
 }

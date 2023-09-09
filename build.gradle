@@ -13,6 +13,7 @@ repositories {
         name = "spigotmc-repo"
         url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
     }
+    maven { url 'https://maven.enginehub.org/repo/' }
     maven {
         name = "sonatype"
         url = "https://oss.sonatype.org/content/groups/public/"
@@ -31,6 +32,9 @@ dependencies {
     compileOnly("com.intellectualsites.plotsquared:plotsquared-core")
     compileOnly("com.intellectualsites.plotsquared:plotsquared-bukkit")
     shadow 'com.zaxxer:HikariCP:5.0.1'
+    // https://mvnrepository.com/artifact/com.sk89q.worldedit/worldedit-bukkit
+    compileOnly group: 'com.sk89q.worldedit', name: 'worldedit-bukkit', version: '7.2.15'
+
 }
 
 artifacts {

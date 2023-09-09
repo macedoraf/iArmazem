@@ -20,18 +20,18 @@ public class ArmazemModel {
         return value;
     }
 
-    public void addItem(String ID, int amount) {
+    public void addItem(String id, int amount) {
         for (ItemArmazemModel item : itens) {
-            if(item.getID().equalsIgnoreCase(ID+"")) {
+            if(item.getID().equalsIgnoreCase(id)) {
                 item.addQuantidade(amount);
                 return;
             }
         }
     }
 
-    public boolean hasItem(String ID) {
+    public boolean hasItem(String id) {
         for (ItemArmazemModel item : itens) {
-            if(item.getID().equalsIgnoreCase(ID+"")) {
+            if(item.getID().equalsIgnoreCase(id)) {
                 return true;
             }
         }

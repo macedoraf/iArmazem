@@ -44,7 +44,7 @@ public final class IArmazem extends JavaPlugin {
         if (Bukkit.getPluginManager().getPlugin("PlotSquared") != null) {
             PlotAPI api = new PlotAPI();
             new PlotEvent(api, databaseMethod, this);
-            new InventoryArmazemEvent(api);
+            new InventoryArmazemEvent(api,databaseMethod, economy);
             new SpawnItemEvent(api, databaseMethod);
             getCommand("armazem").setExecutor(new CommandArmazem(api, armazemInventory, databaseMethod));
         } else {

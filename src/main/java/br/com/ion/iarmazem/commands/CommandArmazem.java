@@ -34,7 +34,6 @@ public class CommandArmazem implements CommandExecutor {
             return true;
         }
         Player player = (Player) sender;
-        PlotAPI plotAPI = new PlotAPI();
         PlotPlayer plotPlayer = BukkitPlayer.from(player);
         Plot plot = plotPlayer.getCurrentPlot();
 
